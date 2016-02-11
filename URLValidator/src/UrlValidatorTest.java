@@ -16,9 +16,8 @@
  */
 
 
+import junit.framework.Assert;
 import junit.framework.TestCase;
-
-
 
 
 
@@ -37,19 +36,62 @@ public class UrlValidatorTest extends TestCase {
    }
 
    
-   
-   public void testManualTest()
+public void testManualTest()
    {
 	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
-	   System.out.println(urlVal.isValid("http://www.amazon.com"));
 	   
+	   int i;
+	   boolean result, expected;
+
+       String[][] urls = {
+           {"htps://www.google.com", "false"},
+           {"https://google.com/something.php", "true"},
+           {"https://google.com/something.php", "true"},
+           {"https://mail.google.com/mail/u/0/#inbox", "true"},
+           {"https://oregonstate.instructure.com/courses/1568425/assignments/6656123?module_item_id=16591766", "true"},
+           {"https://oregonstate.instructure.com/courses//assignments/6656123?module_item_id=16591766","false"},
+           {"https//oregonstate.instructure.com/courses/","false"},
+           {"https://oregonstate.instructure/courses","false"},
+           {"http://oregonstate.instructure.com/courses/1568425/","true"},
+           {"http://localhost:8080/_ah/api/explorer","true"},
+           {"https://altavista.com","true"},
+           {"http://www.altavista.comwww.altavista.com","true"},
+           {"http://www","false"},
+           {"3tp://www.altavista.com","false"},
+           {"http://www.mydomain.com\test","false"},
+           {"ftps://www.mydomain.com/|value/file","false"},
+           {"http://altavista.com/index.php?iam=aparam","true"},
+           {"ftp://user@test.com:80","true"},
+           {"ftp://user:password@test.com:80","true"},
+           {"http://altavista.d/", "false"},
+           {"http://google.de/index.html>file", "false"}
+       };
+       
+       for (i = 0; i < urls.length; i++) {
+    	   
+    	   result = urlVal.isValid(urls[i][0]);
+    	   expected = Boolean.valueOf(urls[i][1].toString());
+    	   
+           if (result == expected) {
+                System.out.println("Pass: Returned: " + expected + " url: " + urls[i][0]);
+           } else {
+                System.out.println("Fail: Returned:" + result + " Expected: " + expected + " url: " + urls[i][0]);
+           }
+	   }
+
+	      
+	   //failure verification
+	   //assertTrue(urlVal.isValid("http://altavista.com/index.php?iam=aparam&meto=alsoparam"));	   	   
+	   //assertTrue(urlVal.isValid("http://myname@test.com:80"));
+	   //assertTrue(urlVal.isValid("http://myname:mypass@test.com:80"));
 	   
    }
    
    
-   public void testYourFirstPartition()
+
+public void testYourFirstPartition()
    {
-	   
+	
    }
    
    public void testYourSecondPartition(){
