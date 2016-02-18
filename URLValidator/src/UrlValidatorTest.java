@@ -16,6 +16,9 @@
  */
 
 
+import java.util.List;
+import java.util.Vector;
+
 import junit.framework.Assert;
 import junit.framework.TestCase;
 
@@ -91,11 +94,17 @@ public void testManualTest()
 
 public void testYourFirstPartition()
    {
-	
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   assertTrue(urlVal.isValid("http://www.amazon.com"));
+	   
+	   //verify partition
    }
    
    public void testYourSecondPartition(){
+	   UrlValidator urlVal = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
+	   assertTrue(urlVal.isValid("http://www.amazon.com"));
 	   
+	   //verify partition
    }
    
    
@@ -106,9 +115,94 @@ public void testYourFirstPartition()
 		   
 	   }
    }
-   
+
    public void testAnyOtherUnitTest()
    {
+
+   }
+ 
+   public void testIsValidScheme()
+   {
+	   String[] allowedSchemes = {"http", "https", "ftp"};
+	   UrlValidator urlValidator1 = new UrlValidator(allowedSchemes, 0);
+	   int i;
+	   boolean result;
+	   
+	   List<ResultPair> schemesToTest = new Vector();
+	   schemesToTest.add(new ResultPair("http", true));
+	   schemesToTest.add(new ResultPair("HTTP", true));
+	   schemesToTest.add(new ResultPair("https", true));
+	   schemesToTest.add(new ResultPair("HTTPS", true));
+	   schemesToTest.add(new ResultPair("ftp", true));
+	   schemesToTest.add(new ResultPair("FTP", true));
+	   schemesToTest.add(new ResultPair("http:", false));
+	   schemesToTest.add(new ResultPair("https:/", false));
+	   schemesToTest.add(new ResultPair("localhost:", false));
+	   schemesToTest.add(new ResultPair("gtp", false));
+	   schemesToTest.add(new ResultPair("httpa", false));
+	   schemesToTest.add(new ResultPair("fttp", false));
+	   schemesToTest.add(new ResultPair("", true));
+	   schemesToTest.add(new ResultPair("httphttp", false));
+	   schemesToTest.add(new ResultPair("localhost", false));
+	   schemesToTest.add(new ResultPair("LOCALHOST", false));
+	   
+	   
+	   for (i = 0; i < schemesToTest.size(); i++) {
+		   result = urlValidator1.isValidScheme(schemesToTest.get(i).item);
+		   assertEquals(schemesToTest.get(i).item, schemesToTest.get(i).valid, result);
+		   if (schemesToTest.get(i).item == "localhost" || schemesToTest.get(i).item == "LOCALHOST") {
+			   schemesToTest.remove(i);
+		   }
+	   }
+	   
+	   UrlValidator urlValidator2 = new UrlValidator(UrlValidator.ALLOW_ALL_SCHEMES);
+	   
+	   schemesToTest.add(new ResultPair("file", true));
+	   schemesToTest.add(new ResultPair("FILE", true));
+	   schemesToTest.add(new ResultPair("localhost", true));
+	   schemesToTest.add(new ResultPair("LOCALHOST", true)); 
+	   
+	   for (i = 0; i < schemesToTest.size(); i++) {
+		   result = urlValidator2.isValidScheme(schemesToTest.get(i).item);
+		   assertEquals(schemesToTest.get(i).item, schemesToTest.get(i).valid, result);
+	   }
+   }
+   
+   public void testIsValidFragment()
+   {
+	   UrlValidator urlValidator = new UrlValidator(UrlValidator.NO_FRAGMENTS);
+	   List<ResultPair> fragments = new Vector();
+	   fragments.add(new ResultPair("", true));
+	   fragments.add(new ResultPair(null, true));
+	   fragments.add(new ResultPair("something", false));
+	   fragments.add(new ResultPair("?hello", false));
+	   fragments.add(new ResultPair("1", false));
+	   fragments.add(new ResultPair("http", false));
+	   fragments.add(new ResultPair(".", false));
+	   
+	   int i;
+	   boolean result;
+	   
+	   for (i = 0; i < fragments.size(); i++) {
+		   result = urlValidator.isValidFragment(fragments.get(i).item);
+		   assertEquals(fragments.get(i).item, fragments.get(i).valid, result);
+	   }
+	   
+	   fragments.clear();
+	   fragments.add(new ResultPair("", true));
+	   fragments.add(new ResultPair(null, true));
+	   fragments.add(new ResultPair("something", true));
+	   fragments.add(new ResultPair("?hello", true));
+	   fragments.add(new ResultPair("1", true));
+	   fragments.add(new ResultPair("http", true));
+	   fragments.add(new ResultPair(".", true));
+	   
+	   UrlValidator urlValidator2 = new UrlValidator();
+	   
+	   for (i = 0; i < fragments.size(); i++) {
+		   result = urlValidator2.isValidFragment(fragments.get(i).item);
+		   assertEquals(fragments.get(i).item, fragments.get(i).valid, result);
+	   }
 	   
    }
    /**
