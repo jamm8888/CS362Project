@@ -162,7 +162,8 @@ public class UrlValidatorTest extends TestCase {
 		ArrayList<UrlPart> urlUnderTest = new ArrayList<UrlPart>(); 
 		String pf = "PASS";
 		
-		System.out.println("STARTING TwoWayTest: ALLOW_LOCAL_URLS");
+		System.out.println("");
+		System.out.println("STARTING TWayTest: Input Partition: ALLOW_LOCAL_URLS");
 		
 		for(int i = 0; i < urlIndex.getIndexCount(); i++){
 			
@@ -202,7 +203,7 @@ public class UrlValidatorTest extends TestCase {
 		UrlValidator urlValidator = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
 
 		// Setup a UrlSet and initialize with partitions
-		UrlSet urlSet = initializeTWayTestAllowLocal();
+		UrlSet urlSet = initializeTWayTestAllowAll();
 		UrlPart tempUrlPart;
 		
 		// Create a TWayIndex which will return a url based on the index provided
@@ -212,12 +213,14 @@ public class UrlValidatorTest extends TestCase {
 		ArrayList<UrlPart> urlUnderTest = new ArrayList<UrlPart>(); 
 		String pf = "PASS";
 
-		
-		System.out.println("STARTING TwoWayTest: ALLOW_ALL_SCHEMES");
+		System.out.println("");
+		System.out.println("STARTING TWayTest Input Partition: ALLOW_ALL_SCHEMES");
 		
 		for(int i = 0; i < urlIndex.getIndexCount(); i++){
 
 			pf = "PASS";
+			if(i == 1074)
+				pf = "PASS";
 			
 			tempUrlPart = urlIndex.getUrl(urlSet, i);
 			tempUrlPart.result = urlValidator.isValid(tempUrlPart.part);
@@ -417,7 +420,6 @@ public class UrlValidatorTest extends TestCase {
 		UrlSet.addFragment("#|", true);
 		UrlSet.addFragment("", true);
 		UrlSet.addFragment("#" + "\0", true); // "\0" allowed
-		//UrlSet.addFragment("#"\0"", false); // "\0"
 		
 		return UrlSet;
 	}
