@@ -304,6 +304,211 @@ public class UrlValidatorTest extends TestCase {
 	   }
    }
    
+   public void testIsValidAuthority()
+   {
+	   boolean result;
+	   int i;
+	   String[] infrastructure = new String[] {"arpa", "root"};
+	   String[] generic = new String[] {"aero", "asia", "biz", "cat", "com", "coop", "info", "jobs", "mobi", "museum",
+			   							"name", "net", "org", "pro", "tel", "travel", "gov", "edu", "mil", "int"};
+	   String[] country = new String[] {"ac", "ad", "ae", "af", "ag", "ai", "al", "am", "an", "ao", "aq", "ar", "as", "at",
+			   							"au", "aw", "ax", "az", "ba", "bb", "bd", "be", "bf", "bg", "bh", "bi", "bj", "bm",
+			   							"bn", "bo", "br", "bs", "bt", "bv", "bw", "by", "bz", "ca", "cc", "cd", "cf", "cg",
+			   							"ch", "ci", "ck", "cl", "cm", "cn", "co", "cr", "cu", "cv", "cx", "cy", "cz", "de",
+			   							"dj", "dk", "dm", "do", "dz", "ec", "ee", "eg", "er", "es", "et", "eu", "fi", "fj",
+			   							"fk", "fm", "fo", "fr", "ga", "gb", "gd", "ge", "gf", "gg", "gh", "gi", "gl", "gm",
+			   							"gn", "gp", "gq", "gr", "gs", "gt", "gu", "gw", "gy", "hk", "hm", "hn", "hr", "ht",
+			   							"hu", "id", "ie", "il", "im", "in", "io", "iq", "ir", "is", "it", "je", "jm", "jo",
+			   							"jp", "ke", "kg", "kh", "ki", "km", "kn", "kp", "kr", "kw", "ky", "kz", "la", "lb",
+			   							"lc", "li", "lk", "lr", "ls", "lt", "lu", "lv", "ly", "ma", "mc", "md", "me", "mg",
+			   							"mh", "mk", "ml", "mm", "mn", "mo", "mp", "mq", "mr", "ms", "mt", "mu", "mv", "mw",
+			   							"mx", "my", "mz", "na", "nc", "ne", "nf", "ng", "ni", "nl", "no", "np", "nr", "nu",
+			   							"nz", "om", "pa", "pe", "pf", "pg", "ph", "pk", "pl", "pm", "pn", "pr", "ps", "pt",
+			   							"pw", "py", "qa", "re", "ro", "rs", "ru", "rw", "sa", "sb", "sc", "sd", "se", "sg",
+			   							"sh", "si", "sj", "sk", "sl", "sm", "sn", "so", "sr", "st", "su", "sv", "sy", "sz",
+			   							"tc", "td", "tf", "tg", "th", "tj", "tk", "tl", "tm", "tn", "to", "tp", "tr", "tt",
+			   							"tv", "tw", "tz", "ua", "ug", "uk", "um", "us", "uy", "uz", "va", "vc", "ve", "vg",
+			   							"vi", "vn", "vu", "wf", "ws", "ye", "yt", "yu", "za", "zm", "zw"};
+	   List<ResultPair> authorities = new Vector();
+	   UrlValidator urlValidator = new UrlValidator();
+	   String testHostname = "testauthority.";
+
+	   // test TLDs
+	   for (i = 0; i < infrastructure.length; i++)
+	   {
+		   authorities.add(new ResultPair(testHostname + infrastructure[i], true));
+	   }
+
+	   for (i = 0; i < generic.length; i++)
+	   {
+		   authorities.add(new ResultPair(testHostname + generic[i], true));
+	   }
+
+	   for (i = 0; i < country.length; i++)
+	   {
+		   authorities.add(new ResultPair(testHostname + country[i], true));
+	   }
+
+	   authorities.add(new ResultPair(null, false));
+	   authorities.add(new ResultPair("longer.test.authority.com", true));
+	   authorities.add(new ResultPair("notld.test.authority", false));
+
+	   for (i = 0; i < authorities.size(); i++) {
+		   result = urlValidator.isValidAuthority(authorities.get(i).item);
+		   //assertEquals(authorities.get(i).item, authorities.get(i).valid, result);
+		   if (result != authorities.get(i).valid) {
+			   System.out.println("authority FAIL: " + authorities.get(i).item);
+			   System.out.println("Expected: " + authorities.get(i).valid + ", Result: " + result);
+		   }
+
+	   }
+
+	   // test ports
+
+	   int thisAuthority = 0;
+	   String validAuthority;
+	   // grab first authority that validates to use as base for port tests
+	   while (!urlValidator.isValidAuthority(authorities.get(thisAuthority).item)) {
+		   thisAuthority++;
+	   }
+
+	   validAuthority = authorities.get(thisAuthority).item;
+	   authorities.clear();
+	   authorities.add(new ResultPair(validAuthority + "", true));
+	   authorities.add(new ResultPair(validAuthority + ":8", true));
+	   authorities.add(new ResultPair(validAuthority + ":80", true));
+	   authorities.add(new ResultPair(validAuthority + ":8080", true));
+	   authorities.add(new ResultPair(validAuthority + ":9000", true));
+	   authorities.add(new ResultPair(validAuthority + ":65535", true));
+	   authorities.add(new ResultPair(validAuthority + ":999999", false));
+	   authorities.add(new ResultPair(validAuthority + ":test", false));
+	   authorities.add(new ResultPair(validAuthority + ":" + "\0", false));
+
+	   for (i = 0; i < authorities.size(); i++) {
+		   result = urlValidator.isValidAuthority(authorities.get(i).item);
+		   //assertEquals(authorities.get(i).item, authorities.get(i).valid, result);
+		   if (result != authorities.get(i).valid) {
+			   System.out.println("authority FAIL: " + authorities.get(i).item);
+			   System.out.println("Expected: " + authorities.get(i).valid + ", Result: " + result);
+		   }
+
+	   }
+
+	   authorities.clear();
+
+	   // test ips
+	   authorities.add(new ResultPair("74.125.224.72", true));
+	   authorities.add(new ResultPair("255.255.255.255", true));
+	   authorities.add(new ResultPair("2555.2555.2555.2555", false));
+	   authorities.add(new ResultPair("8.8.8.8", true));
+	   authorities.add(new ResultPair("88.88.88.88", true));
+	   authorities.add(new ResultPair("8..8.8", false));
+	   authorities.add(new ResultPair("255.255.255", false));
+	   authorities.add(new ResultPair("255.255", false));
+	   authorities.add(new ResultPair("255", false));
+
+	   for (i = 0; i < authorities.size(); i++) {
+		   result = urlValidator.isValidAuthority(authorities.get(i).item);
+		   //assertEquals(authorities.get(i).item, authorities.get(i).valid, result);
+		   if (result != authorities.get(i).valid) {
+			   System.out.println("authority FAIL: " + authorities.get(i).item);
+			   System.out.println("Expected: " + authorities.get(i).valid + ", Result: " + result);
+		   }
+
+	   }
+   }
+
+   public void testIsValidPath()
+   {
+	   boolean result;
+	   List<ResultPair> paths = new Vector();
+	   UrlValidator urlValidator = new UrlValidator();
+	   paths.add(new ResultPair("/test", true));
+	   paths.add(new ResultPair("/test/", true));
+	   paths.add(new ResultPair("/test/a/longer/path", true));
+	   paths.add(new ResultPair("/test$", true));
+	   paths.add(new ResultPair("/test!", true));
+	   paths.add(new ResultPair("/test@", true));
+	   paths.add(new ResultPair("/test=", true));
+	   paths.add(new ResultPair("/test+", true));
+	   paths.add(new ResultPair("/test,", true));
+	   paths.add(new ResultPair("/test.", true));
+	   paths.add(new ResultPair("/test~", true));
+	   paths.add(new ResultPair("/test*", true));
+	   paths.add(new ResultPair("/test-", true));
+	   paths.add(new ResultPair("/test_", true));
+	   paths.add(new ResultPair("/test;", true));
+	   paths.add(new ResultPair("/test%", true));
+	   paths.add(new ResultPair("/test'", true));
+	   paths.add(new ResultPair("/~test", true));
+	   paths.add(new ResultPair("/test#", false));
+	   paths.add(new ResultPair("/test.php", true));
+	   paths.add(new ResultPair("/test!.php", true));
+	   paths.add(new ResultPair("/", true));
+	   paths.add(new ResultPair("//", false));
+	   paths.add(new ResultPair("/test//file", false));
+	   paths.add(new ResultPair("/test/file", true));
+	   paths.add(new ResultPair("/test!/file", true));
+	   paths.add(new ResultPair("/../test/", true));
+	   paths.add(new ResultPair("/.../", false));
+	   paths.add(new ResultPair("", true));
+	   paths.add(new ResultPair(null, false));
+
+	   for (int i = 0; i < paths.size(); i++) {
+		   result = urlValidator.isValidPath(paths.get(i).item);
+		   //assertEquals(paths.get(i).item, paths.get(i).valid, result);
+		   if (result != paths.get(i).valid) {
+			   System.out.println("path FAIL: " + paths.get(i).item);
+			   System.out.println("Expected: " + paths.get(i).valid + ", Result: " + result);
+		   }
+	   }
+
+	   paths.clear();
+	   // allow 2 slashes
+	   UrlValidator urlValidator2 = new UrlValidator(UrlValidator.ALLOW_2_SLASHES);
+	   paths.add(new ResultPair("//", true));
+	   paths.add(new ResultPair("/twoslashestests//file", true));
+	   paths.add(new ResultPair("/../twoslashestests//file", true));
+	   paths.add(new ResultPair("/../twoslashestest//file", true));
+	   paths.add(new ResultPair("/.//twoslashestest", true));
+	   paths.add(new ResultPair("/..//twoslashestest", false));
+	   paths.add(new ResultPair("/..../twoslashestest//file", false));
+
+	   for (int i = 0; i < paths.size(); i++) {
+		   result = urlValidator2.isValidPath(paths.get(i).item);
+		   //assertEquals(paths.get(i).item, paths.get(i).valid, result);
+		   if (result != paths.get(i).valid) {
+			   System.out.println("path FAIL: " + paths.get(i).item);
+			   System.out.println("Expected: " + paths.get(i).valid + ", Result: " + result);
+		   }
+	   }
+
+   }
+
+   public void testIsValidQuery()
+   {
+	   boolean result;
+	   UrlValidator urlValidator = new UrlValidator();
+	   List<ResultPair> queries = new Vector();
+	   queries.add(new ResultPair("", true));
+	   queries.add(new ResultPair("test", true));
+	   queries.add(new ResultPair("thing=something", true));
+	   queries.add(new ResultPair("thing=something&otherthing=someotherthing", true));
+	   // only newline and null should return false
+	   queries.add(new ResultPair("\n", false));
+       queries.add(new ResultPair(null, true));
+
+       for (int i = 0; i < queries.size(); i++) {
+		   result = urlValidator.isValidQuery(queries.get(i).item);
+		   //assertEquals(queries.get(i).item, queries.get(i).valid, result);
+		   if (result != queries.get(i).valid) {
+			   System.out.println("query FAIL: " + queries.get(i).item);
+			   System.out.println("Expected: " + queries.get(i).valid + ", Result: " + result);
+		   }
+	   }
+
+   }
+   
    public void testIsValidFragment()
    {
 	   UrlValidator urlValidator = new UrlValidator(UrlValidator.NO_FRAGMENTS);
