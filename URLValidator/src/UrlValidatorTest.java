@@ -33,9 +33,7 @@ import junit.framework.TestCase;
 public class UrlValidatorTest extends TestCase {
 
    private boolean printStatus = false;
-   private boolean printIndex = false;//print index that indicates current scheme,host,port,path, query test were using.
-   private boolean PRFAILONLY = true;
-   private boolean DEBUG = false;
+   //private boolean printIndex = false;//print index that indicates current scheme,host,port,path, query test were using.
    
    public UrlValidatorTest(String testName) {
       super(testName);
@@ -45,10 +43,11 @@ public class UrlValidatorTest extends TestCase {
    public void testManualTest1()
    {
 	   UrlValidator urlValidator = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
-		
+	   Boolean testPass = true;
+	   
 	   // A few URLs for Allow ALL
 	   Url[] urls = {
-			new Url("htps://www.google.com", false),
+			new Url("htps://www.google.com/", true),
 			new Url("https://google.com/something.php", true),
 			new Url("https://google.com/something.php", true),
 			new Url("https://mail.google.com/mail/u/0/#inbox", true),
@@ -57,7 +56,7 @@ public class UrlValidatorTest extends TestCase {
 			new Url("https//oregonstate.instructure.com/courses/",false),
 			new Url("https://oregonstate.instructure/courses",false),
 			new Url("http://oregonstate.instructure.com/courses/1568425/",true),
-			new Url("http://localhost:8080/_ah/api/explorer",true),
+			new Url("http://localhost:8080/_ah/api/explorer",false),
 			new Url("https://altavista.com",true),
 			new Url("http://www.altavista.comwww.altavista.com",true),
 			new Url("http://www",false),
@@ -68,7 +67,10 @@ public class UrlValidatorTest extends TestCase {
 			new Url("ftp://user@test.com:80",true),
 			new Url("ftp://user:password@test.com:80",true),
 			new Url("http://altavista.d/", false),
-			new Url("http://google.de/index.html>file", false)
+			new Url("http://google.de/index.html>file", false),
+			new Url(null, false),
+			new Url("\u1D200", false)
+
 		};
 		
 		// check all schemes
@@ -78,42 +80,43 @@ public class UrlValidatorTest extends TestCase {
 		}
 		
 		for (int i = 0; i < urls.length; i++) 
-		{
-			String testResult = "PASS";
-			
-			if(urls[i].expected != urls[i].result)
+		{			
+			try
+			{				
+				assertTrue(urls[i].result == urls[i].expected);				
+			} 
+			catch (AssertionError e)
 			{
-				testResult = "FAIL";
-			}
-			
-			System.out.println(testResult);
-			System.out.println("Url: " + urls[i].url);
-			System.out.println("expected: " + urls[i].expected + " result: " + urls[i].result);
-			System.out.println();
-		}
-  
-	   //failure verification
-	   //assertTrue(urlVal.isValid("http://altavista.com/index.php?iam=aparam&meto=alsoparam"));	   	   
-	   //assertTrue(urlVal.isValid("http://myname@test.com:80"));
-	   //assertTrue(urlVal.isValid("http://myname:mypass@test.com:80"));
-
-	   
+				System.out.println("manualurl1 Fail:" + urls[i].url);
+				System.out.println("expected: " + urls[i].expected + " result: " + urls[i].result);
+				testPass = false;
+			} 								
+		}  
+		
+		if(testPass && printStatus)
+			System.out.println("manualurl1: ALL PASS");
    }
-   
+  
    public void testManualTest2()
    {
 	   	UrlValidator urlValidator = new UrlValidator(null, null, UrlValidator.ALLOW_LOCAL_URLS);
-				
+		Boolean testPass = true;
+		
 		// a few URLS for Allow local
 		Url[] urls = {
 			new Url("http://staff.ustc.edu.cn/~csli/graduate/algorithms/book6/528_a.gif", true),
 			new Url("http://localhost/", true),
+			// copied this one here too to cover allow_local with port
+			new Url("http://localhost:8080/_ah/api/explorer", true),
 			new Url("https://news.google.com/", true),
-			new Url("https://news.google.com/news/section?cf=all&pz=1&topic=w&siidp=15d80b47ba7f54d65c4eea90b676dc0c6c36&ict=ln", false),
+			// changed to true
+			new Url("https://news.google.com/news/section?cf=all&pz=1&topic=w&siidp=15d80b47ba7f54d65c4eea90b676dc0c6c36&ict=ln", true),
 			new Url("amazon.com", false),
 			new Url("http://www.amazon.com/Cracking-Coding-Interview-6th-Programming/dp/0984782850/", true),
-			new Url("http://www.amazon.com/Cracking-Coding-Interview-6th-Programming/dp/0984782850/ref=sr_1_1?s=books&ie=UTF8&qid=1455399403&sr=1-1&keywords=cracking+the+coding+interview", false),
-			new Url("http://kcna.kp/kcna.user.home.retrieveHomeInfoList.kcmsf", false),
+			// changed to true
+			new Url("http://www.amazon.com/Cracking-Coding-Interview-6th-Programming/dp/0984782850/ref=sr_1_1?s=books&ie=UTF8&qid=1455399403&sr=1-1&keywords=cracking+the+coding+interview", true),
+			// changed to true
+			new Url("http://kcna.kp/kcna.user.home.retrieveHomeInfoList.kcmsf", true),
 			new Url("http://www.kcna.kp/", true),
 		};
 
@@ -124,32 +127,37 @@ public class UrlValidatorTest extends TestCase {
 		}
 		
 		for (int i = 0; i < urls.length; i++) 
-		{
-			String testResult = "PASS";
-			
-			if(urls[i].expected != urls[i].result)
+		{			
+			try
+			{				
+				assertTrue(urls[i].result == urls[i].expected);				
+			} 
+			catch (AssertionError e)
 			{
-				testResult = "FAIL";
-			}
-			
-			System.out.println(testResult);
-			System.out.println("Url: " + urls[i].url);
-			System.out.println("expected: " + urls[i].expected + " result: " + urls[i].result);
-			System.out.println();
+				System.out.println("manualurl2 Fail:" + urls[i].url);
+				System.out.println("expected: " + urls[i].expected + " result: " + urls[i].result);
+				testPass = false;
+			} 								
 		}
+		
+		if(testPass && printStatus)
+			System.out.println("manualurl2: ALL PASS");
 			   
    	}
 
+  
 	/**
 	 * Function: testTWayInputPartitionLocal
 	 * Description:  tests a series of indexes with URL Validator set to ALLOW_LOCAL_URLS
 	 * Indexes are identified in TWayIndex.java
 	 * @throws FileNotFoundException
 	 */ 
+   
 	public void testTWayInputPartitionLocal() throws FileNotFoundException
 	{
 		// Setup a URL Validator object
 		UrlValidator urlValidator = new UrlValidator(null, null, UrlValidator.ALLOW_LOCAL_URLS);
+		Boolean testPass = true;
 		
 		// Setup a UrlSet and initialize with partitions
 		UrlSet urlSet = initializeTWayTestAllowLocal();
@@ -160,34 +168,24 @@ public class UrlValidatorTest extends TestCase {
 		
 		// Create an arrayList to store the Urls in the event we need further inspection
 		ArrayList<UrlPart> urlUnderTest = new ArrayList<UrlPart>(); 
-		String pf = "PASS";
-		
-		System.out.println("");
-		System.out.println("STARTING TWayTest: Input Partition: ALLOW_LOCAL_URLS");
-		
+				
 		for(int i = 0; i < urlIndex.getIndexCount(); i++){
-			
-			pf = "PASS";
 			
 			tempUrlPart = urlIndex.getUrl(urlSet, i);
 			tempUrlPart.result = urlValidator.isValid(tempUrlPart.part);
 			urlUnderTest.add(tempUrlPart);
 			
-			if(tempUrlPart.expected != tempUrlPart.result){
-				pf = "FAIL";
+			try{
+				assertEquals(tempUrlPart.expected == tempUrlPart.result, true);
+			} catch(AssertionError e){
+				System.out.println("twayPartition1 Fail: " + tempUrlPart.part);
+				System.out.println("Expected: " + tempUrlPart.expected + ", Result: " + tempUrlPart.result);
+				testPass = false;
 			}
-			
-			if((PRFAILONLY == true && tempUrlPart.expected != tempUrlPart.result) || PRFAILONLY == false){
-				System.out.println("Test: " + i + ", Status: " + pf);
-				System.out.println("Note if null in url full url will stop printing at first null");
-				System.out.println("URL: " + tempUrlPart.part);
-				System.out.println("Expected: " + tempUrlPart.expected + ", Result: " + tempUrlPart.result);		
-			} 
-		}
+		}	
 		
-		if(DEBUG)
-			System.out.println(((UrlPart) urlSet.urlScheme.get(0)).part);
-	
+		if(testPass && printStatus)
+			System.out.println("twayPartition Local: ALL TESTS PASS");
 	}
 	
 	/**
@@ -196,12 +194,13 @@ public class UrlValidatorTest extends TestCase {
 	 * Indexes are identified in TWayIndex.java
 	 * @throws FileNotFoundException
 	 */
-	
+   	
 	public void testTWayInputPartitionAll() throws FileNotFoundException
 	{
 		// Setup a URL Validator object
 		UrlValidator urlValidator = new UrlValidator(null, null, UrlValidator.ALLOW_ALL_SCHEMES);
-
+		boolean testPass = true;
+		
 		// Setup a UrlSet and initialize with partitions
 		UrlSet urlSet = initializeTWayTestAllowAll();
 		UrlPart tempUrlPart;
@@ -211,36 +210,23 @@ public class UrlValidatorTest extends TestCase {
 		
 		// Create an arrayList to store the Urls in the event we need further inspection
 		ArrayList<UrlPart> urlUnderTest = new ArrayList<UrlPart>(); 
-		String pf = "PASS";
-
-		System.out.println("");
-		System.out.println("STARTING TWayTest Input Partition: ALLOW_ALL_SCHEMES");
 		
 		for(int i = 0; i < urlIndex.getIndexCount(); i++){
-
-			pf = "PASS";
-			if(i == 1074)
-				pf = "PASS";
 			
 			tempUrlPart = urlIndex.getUrl(urlSet, i);
 			tempUrlPart.result = urlValidator.isValid(tempUrlPart.part);
 			urlUnderTest.add(tempUrlPart);
 			
-			if(tempUrlPart.expected != tempUrlPart.result){
-				pf = "FAIL";
-			}
-			
-			if((PRFAILONLY == true && tempUrlPart.expected != tempUrlPart.result) || PRFAILONLY == false){
-				System.out.println("Test: " + i + ", Status: " + pf);
-				System.out.println("Note if null in url full url will stop printing at first null");
-				System.out.println("URL: " + tempUrlPart.part);
+			try{
+				assertEquals(tempUrlPart.expected == tempUrlPart.result, true);
+			} catch(AssertionError e){
+				System.out.println("twayPartition1 Fail: " + tempUrlPart.part);
 				System.out.println("Expected: " + tempUrlPart.expected + ", Result: " + tempUrlPart.result);
-			} 
+				testPass = false;
+			}
 		}
-		
-		if(DEBUG)
-			System.out.println(((UrlPart) urlSet.urlScheme.get(0)).part);
-	
+		if(testPass && printStatus)
+			System.out.println("twayPartition All_scheme: ALL TESTS PASS");
 	}
    
    
@@ -263,21 +249,22 @@ public class UrlValidatorTest extends TestCase {
 	   UrlValidator urlValidator1 = new UrlValidator(allowedSchemes, 0);
 	   int i;
 	   boolean result;
+	   boolean testPass = true;
 	   
 	   List<ResultPair> schemesToTest = new Vector();
 	   schemesToTest.add(new ResultPair("http", true));
-	   schemesToTest.add(new ResultPair("HTTP", true));
+	   schemesToTest.add(new ResultPair("HTTP", false)); // changed to false case sensitive
 	   schemesToTest.add(new ResultPair("https", true));
-	   schemesToTest.add(new ResultPair("HTTPS", true));
+	   schemesToTest.add(new ResultPair("HTTPS", false)); // changed to false case sensitive
 	   schemesToTest.add(new ResultPair("ftp", true));
-	   schemesToTest.add(new ResultPair("FTP", true));
+	   schemesToTest.add(new ResultPair("FTP", false)); // changed to false case sensitive
 	   schemesToTest.add(new ResultPair("http:", false));
 	   schemesToTest.add(new ResultPair("https:/", false));
 	   schemesToTest.add(new ResultPair("localhost:", false));
 	   schemesToTest.add(new ResultPair("gtp", false));
 	   schemesToTest.add(new ResultPair("httpa", false));
 	   schemesToTest.add(new ResultPair("fttp", false));
-	   schemesToTest.add(new ResultPair("", true));
+	   schemesToTest.add(new ResultPair("", false)); // changed to false empty not in list
 	   schemesToTest.add(new ResultPair("httphttp", false));
 	   schemesToTest.add(new ResultPair("localhost", false));
 	   schemesToTest.add(new ResultPair("LOCALHOST", false));
@@ -285,13 +272,22 @@ public class UrlValidatorTest extends TestCase {
 	   
 	   for (i = 0; i < schemesToTest.size(); i++) {
 		   result = urlValidator1.isValidScheme(schemesToTest.get(i).item);
-		   assertEquals(schemesToTest.get(i).item, schemesToTest.get(i).valid, result);
+		   //assertEquals(schemesToTest.get(i).item, schemesToTest.get(i).valid, result);
+		   if (result != schemesToTest.get(i).valid) {
+			   System.out.println("schemes: allowedSchemes FAIL: " + schemesToTest.get(i).item);
+			   System.out.println("Expected: " + schemesToTest.get(i).valid + ", Result: " + result);
+			   testPass = false;
+		   }
 		   if (schemesToTest.get(i).item == "localhost" || schemesToTest.get(i).item == "LOCALHOST") {
 			   schemesToTest.remove(i);
 		   }
+
 	   }
+	   if(testPass && printStatus)
+			System.out.println("schemes: allowedSchemes: ALL PASS");
 	   
 	   UrlValidator urlValidator2 = new UrlValidator(UrlValidator.ALLOW_ALL_SCHEMES);
+	   testPass = true;
 	   
 	   schemesToTest.add(new ResultPair("file", true));
 	   schemesToTest.add(new ResultPair("FILE", true));
@@ -300,13 +296,21 @@ public class UrlValidatorTest extends TestCase {
 	   
 	   for (i = 0; i < schemesToTest.size(); i++) {
 		   result = urlValidator2.isValidScheme(schemesToTest.get(i).item);
-		   assertEquals(schemesToTest.get(i).item, schemesToTest.get(i).valid, result);
+		   //assertEquals(schemesToTest.get(i).item, schemesToTest.get(i).valid, result);
+		   if (result != schemesToTest.get(i).valid) {
+			   System.out.println("schemes: AllowAll FAIL: " + schemesToTest.get(i).item);
+			   System.out.println("Expected: " + schemesToTest.get(i).valid + ", Result: " + result);
+			   testPass = false;
+		   }
 	   }
+	   if(testPass && printStatus)
+			System.out.println("schemes: AllowAll: ALL PASS");
    }
    
    public void testIsValidAuthority()
    {
 	   boolean result;
+	   boolean testPass = true;
 	   int i;
 	   String[] infrastructure = new String[] {"arpa", "root"};
 	   String[] generic = new String[] {"aero", "asia", "biz", "cat", "com", "coop", "info", "jobs", "mobi", "museum",
@@ -330,7 +334,8 @@ public class UrlValidatorTest extends TestCase {
 			   							"tv", "tw", "tz", "ua", "ug", "uk", "um", "us", "uy", "uz", "va", "vc", "ve", "vg",
 			   							"vi", "vn", "vu", "wf", "ws", "ye", "yt", "yu", "za", "zm", "zw"};
 	   List<ResultPair> authorities = new Vector();
-	   UrlValidator urlValidator = new UrlValidator();
+	   UrlValidator urlValidator = UrlValidator.getInstance();
+	   
 	   String testHostname = "testauthority.";
 
 	   // test TLDs
@@ -359,14 +364,17 @@ public class UrlValidatorTest extends TestCase {
 		   if (result != authorities.get(i).valid) {
 			   System.out.println("authority FAIL: " + authorities.get(i).item);
 			   System.out.println("Expected: " + authorities.get(i).valid + ", Result: " + result);
+			   testPass = false;
 		   }
-
 	   }
-
+	   if(testPass && printStatus)
+			System.out.println("authorites: ALL PASS");
+	   
 	   // test ports
 
 	   int thisAuthority = 0;
 	   String validAuthority;
+	   testPass = true;
 	   // grab first authority that validates to use as base for port tests
 	   while (!urlValidator.isValidAuthority(authorities.get(thisAuthority).item)) {
 		   thisAuthority++;
@@ -390,11 +398,16 @@ public class UrlValidatorTest extends TestCase {
 		   if (result != authorities.get(i).valid) {
 			   System.out.println("authority FAIL: " + authorities.get(i).item);
 			   System.out.println("Expected: " + authorities.get(i).valid + ", Result: " + result);
+			   testPass = false;
 		   }
 
 	   }
 
+	   if(testPass && printStatus)
+			System.out.println("authorites:port: ALL PASS");
+	   
 	   authorities.clear();
+	   testPass = true;
 
 	   // test ips
 	   authorities.add(new ResultPair("74.125.224.72", true));
@@ -409,18 +422,23 @@ public class UrlValidatorTest extends TestCase {
 
 	   for (i = 0; i < authorities.size(); i++) {
 		   result = urlValidator.isValidAuthority(authorities.get(i).item);
-		   //assertEquals(authorities.get(i).item, authorities.get(i).valid, result);
+		   assertEquals(authorities.get(i).item, authorities.get(i).valid, result);
 		   if (result != authorities.get(i).valid) {
 			   System.out.println("authority FAIL: " + authorities.get(i).item);
 			   System.out.println("Expected: " + authorities.get(i).valid + ", Result: " + result);
+			   testPass = false;
 		   }
 
 	   }
+	   if(testPass && printStatus)
+			System.out.println("authorites:ip: ALL PASS");
    }
 
    public void testIsValidPath()
    {
 	   boolean result;
+	   boolean testPass = true;
+	   
 	   List<ResultPair> paths = new Vector();
 	   UrlValidator urlValidator = new UrlValidator();
 	   paths.add(new ResultPair("/test", true));
@@ -456,14 +474,18 @@ public class UrlValidatorTest extends TestCase {
 
 	   for (int i = 0; i < paths.size(); i++) {
 		   result = urlValidator.isValidPath(paths.get(i).item);
-		   //assertEquals(paths.get(i).item, paths.get(i).valid, result);
+		   assertEquals(paths.get(i).item, paths.get(i).valid, result);
 		   if (result != paths.get(i).valid) {
 			   System.out.println("path FAIL: " + paths.get(i).item);
 			   System.out.println("Expected: " + paths.get(i).valid + ", Result: " + result);
+			   testPass = false;
 		   }
 	   }
+	   if(testPass && printStatus)
+			System.out.println("path: ALL PASS");
 
 	   paths.clear();
+	   testPass = true;
 	   // allow 2 slashes
 	   UrlValidator urlValidator2 = new UrlValidator(UrlValidator.ALLOW_2_SLASHES);
 	   paths.add(new ResultPair("//", true));
@@ -476,18 +498,23 @@ public class UrlValidatorTest extends TestCase {
 
 	   for (int i = 0; i < paths.size(); i++) {
 		   result = urlValidator2.isValidPath(paths.get(i).item);
-		   //assertEquals(paths.get(i).item, paths.get(i).valid, result);
+		   assertEquals(paths.get(i).item, paths.get(i).valid, result);
 		   if (result != paths.get(i).valid) {
-			   System.out.println("path FAIL: " + paths.get(i).item);
+			   System.out.println("path 2slashes FAIL: " + paths.get(i).item);
 			   System.out.println("Expected: " + paths.get(i).valid + ", Result: " + result);
+			   testPass = false;
 		   }
 	   }
+	   if(testPass && printStatus)
+			System.out.println("path 2slashes: ALL PASS");
 
    }
 
    public void testIsValidQuery()
    {
 	   boolean result;
+	   boolean testPass = true;
+	   
 	   UrlValidator urlValidator = new UrlValidator();
 	   List<ResultPair> queries = new Vector();
 	   queries.add(new ResultPair("", true));
@@ -504,8 +531,11 @@ public class UrlValidatorTest extends TestCase {
 		   if (result != queries.get(i).valid) {
 			   System.out.println("query FAIL: " + queries.get(i).item);
 			   System.out.println("Expected: " + queries.get(i).valid + ", Result: " + result);
+			   testPass = false;
 		   }
 	   }
+       if(testPass && printStatus)
+			System.out.println("query: ALL PASS");
 
    }
    
@@ -513,7 +543,7 @@ public class UrlValidatorTest extends TestCase {
    {
 	   UrlValidator urlValidator = new UrlValidator(UrlValidator.NO_FRAGMENTS);
 	   List<ResultPair> fragments = new Vector();
-	   fragments.add(new ResultPair("", true));
+	   fragments.add(new ResultPair("", false));
 	   fragments.add(new ResultPair(null, true));
 	   fragments.add(new ResultPair("something", false));
 	   fragments.add(new ResultPair("?hello", false));
@@ -523,12 +553,22 @@ public class UrlValidatorTest extends TestCase {
 	   
 	   int i;
 	   boolean result;
+	   boolean testPass = true;
 	   
 	   for (i = 0; i < fragments.size(); i++) {
 		   result = urlValidator.isValidFragment(fragments.get(i).item);
-		   assertEquals(fragments.get(i).item, fragments.get(i).valid, result);
+		   //assertEquals(fragments.get(i).item, fragments.get(i).valid, result);
+		   if (result != fragments.get(i).valid) {
+			   System.out.println("fragments: NOFRAGS FAIL: " + fragments.get(i).item);
+			   System.out.println("Expected: " + fragments.get(i).valid + ", Result: " + result);
+			   testPass = false;
+		   }
 	   }
 	   
+	   if(testPass && printStatus)
+			System.out.println("fragments: no_frag: ALL PASS");
+
+	   testPass = true;
 	   fragments.clear();
 	   fragments.add(new ResultPair("", true));
 	   fragments.add(new ResultPair(null, true));
@@ -542,15 +582,22 @@ public class UrlValidatorTest extends TestCase {
 	   
 	   for (i = 0; i < fragments.size(); i++) {
 		   result = urlValidator2.isValidFragment(fragments.get(i).item);
-		   assertEquals(fragments.get(i).item, fragments.get(i).valid, result);
+		   //assertEquals(fragments.get(i).item, fragments.get(i).valid, result);
+		   if (result != fragments.get(i).valid) {
+			   System.out.println("fragments: FAIL: " + fragments.get(i).item);
+			   System.out.println("Expected: " + fragments.get(i).valid + ", Result: " + result);
+			   testPass = false;
+		   }
 	   }
-	   
+	   if(testPass && printStatus)
+			System.out.println("fragments: ALL PASS");	   
    }
    
    /**
     * Initialize tests for TWay testing with Allow All Schemes
     * @return
     */
+    
 	public UrlSet initializeTWayTestAllowAll(){
 	   
 		UrlSet UrlSet = new UrlSet();
@@ -633,6 +680,7 @@ public class UrlValidatorTest extends TestCase {
     * Initialize tests for TWay testing with Allow Local
     * @return
     */
+   
 	public UrlSet initializeTWayTestAllowLocal(){
 		
 		UrlSet UrlSet = new UrlSet();
@@ -658,7 +706,7 @@ public class UrlValidatorTest extends TestCase {
 		
 		// add Host
 		UrlSet.addHost("www.test", true);
-		UrlSet.addHost("3ww", false);
+		UrlSet.addHost("3www", false);
 		UrlSet.addHost("192.168.0.1", true);
 		UrlSet.addHost("256.256.256.256", false);
 		UrlSet.addHost("", false);
@@ -704,7 +752,7 @@ public class UrlValidatorTest extends TestCase {
 		// add fragment
 		UrlSet.addFragment("#fragment", true);
 		UrlSet.addFragment("#", true);
-		UrlSet.addFragment("#\\", true);
+		UrlSet.addFragment("#\u1D200", false);
 		UrlSet.addFragment("", true);
 		UrlSet.addFragment("#" + "\0", true); // "\0" fragment is allowed
 		
