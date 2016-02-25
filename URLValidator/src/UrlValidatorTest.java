@@ -152,7 +152,7 @@ public class UrlValidatorTest extends TestCase {
 	 * Indexes are identified in TWayIndex.java
 	 * @throws FileNotFoundException
 	 */ 
-   
+  
 	public void testTWayInputPartitionLocal() throws FileNotFoundException
 	{
 		// Setup a URL Validator object
@@ -187,14 +187,14 @@ public class UrlValidatorTest extends TestCase {
 		if(testPass && printStatus)
 			System.out.println("twayPartition Local: ALL TESTS PASS");
 	}
-	
+
 	/**
 	 * Function: testTWayInputPartitionLocal
 	 * Description:  tests a series of indexes with URL Validator set to ALLOW_ALL_SCHEMES
 	 * Indexes are identified in TWayIndex.java
 	 * @throws FileNotFoundException
 	 */
-   	
+ 
 	public void testTWayInputPartitionAll() throws FileNotFoundException
 	{
 		// Setup a URL Validator object
@@ -278,9 +278,11 @@ public class UrlValidatorTest extends TestCase {
 			   System.out.println("Expected: " + schemesToTest.get(i).valid + ", Result: " + result);
 			   testPass = false;
 		   }
+		   /*
 		   if (schemesToTest.get(i).item == "localhost" || schemesToTest.get(i).item == "LOCALHOST") {
 			   schemesToTest.remove(i);
 		   }
+		   */
 
 	   }
 	   if(testPass && printStatus)
@@ -288,7 +290,22 @@ public class UrlValidatorTest extends TestCase {
 	   
 	   UrlValidator urlValidator2 = new UrlValidator(UrlValidator.ALLOW_ALL_SCHEMES);
 	   testPass = true;
-	   
+
+	   schemesToTest.clear();
+	   schemesToTest.add(new ResultPair("http", true));
+	   schemesToTest.add(new ResultPair("HTTP", true)); // changed to false case sensitive
+	   schemesToTest.add(new ResultPair("https", true));
+	   schemesToTest.add(new ResultPair("HTTPS", true)); // changed to false case sensitive
+	   schemesToTest.add(new ResultPair("ftp", true));
+	   schemesToTest.add(new ResultPair("FTP", true)); // changed to false case sensitive
+	   schemesToTest.add(new ResultPair("http:", false));
+	   schemesToTest.add(new ResultPair("https:/", false));
+	   schemesToTest.add(new ResultPair("localhost:", false));
+	   schemesToTest.add(new ResultPair("gtp", true));
+	   schemesToTest.add(new ResultPair("httpa", true));
+	   schemesToTest.add(new ResultPair("fttp", true));
+	   schemesToTest.add(new ResultPair("", false)); // changed to false empty not in list
+	   schemesToTest.add(new ResultPair("httphttp", true));
 	   schemesToTest.add(new ResultPair("file", true));
 	   schemesToTest.add(new ResultPair("FILE", true));
 	   schemesToTest.add(new ResultPair("localhost", true));
@@ -303,10 +320,11 @@ public class UrlValidatorTest extends TestCase {
 			   testPass = false;
 		   }
 	   }
+	   
 	   if(testPass && printStatus)
 			System.out.println("schemes: AllowAll: ALL PASS");
    }
-   
+ 
    public void testIsValidAuthority()
    {
 	   boolean result;
