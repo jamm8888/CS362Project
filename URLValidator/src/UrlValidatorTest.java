@@ -403,8 +403,10 @@ public class UrlValidatorTest extends TestCase {
 	   authorities.add(new ResultPair(validAuthority + "", true));
 	   authorities.add(new ResultPair(validAuthority + ":8", true));
 	   authorities.add(new ResultPair(validAuthority + ":80", true));
+	   authorities.add(new ResultPair(validAuthority + ":800", true));
 	   authorities.add(new ResultPair(validAuthority + ":8080", true));
 	   authorities.add(new ResultPair(validAuthority + ":9000", true));
+	   authorities.add(new ResultPair(validAuthority + ":30000", true));
 	   authorities.add(new ResultPair(validAuthority + ":65535", true));
 	   authorities.add(new ResultPair(validAuthority + ":999999", false));
 	   authorities.add(new ResultPair(validAuthority + ":test", false));
